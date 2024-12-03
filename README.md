@@ -1,0 +1,1 @@
+Repozytorium zawiera kod odpowiedzialny obsługujący kartę sd
