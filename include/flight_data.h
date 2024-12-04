@@ -7,14 +7,14 @@
 #include "freertos/semphr.h"
 
 // STATE ENUM
-enum State
+typedef enum
 {
     RAIL,
     ENGINE_FLIGHT,
     CONTROLLED_FLIGHT,
     FALL,
     GROUND
-};
+} State;
 
 typedef struct
 {
@@ -77,7 +77,7 @@ typedef struct
 
     float position[3];
     float velocity[3];
-    float orientation[3];
+    float orientation[3]; 
     float angular_vel[3];
     SemaphoreHandle_t mutex;
 } absolute_state_t;

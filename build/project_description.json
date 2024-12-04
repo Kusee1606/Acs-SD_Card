@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "Acs-SD_Card",
-    "project_version":    "1",
+    "project_version":    "da8a2dc-dirty",
     "project_path":       "C:/Users/Kusee/Acs-SD_Card",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.2.3",
     "build_dir":          "C:/Users/Kusee/Acs-SD_Card/build",
@@ -798,14 +798,14 @@
             "target": "___idf_main",
             "prefix": "idf",
             "dir": "C:/Users/Kusee/Acs-SD_Card/main",
-            "type": "CONFIG_ONLY",
+            "type": "LIBRARY",
             "lib": "__idf_main",
             "reqs": [],
             "priv_reqs": [],
             "managed_reqs": [],
             "managed_priv_reqs": [],
-            "file": "",
-            "sources": [],
+            "file": "C:/Users/Kusee/Acs-SD_Card/build/esp-idf/main/libmain.a",
+            "sources": [ "C:/Users/Kusee/Acs-SD_Card/main/sd_card.c", "C:/Users/Kusee/Acs-SD_Card/main/main.c" ],
             "include_dirs": [ "." ]
         },
         "mbedtls": {
