@@ -1,7 +1,7 @@
 {
     "version":            "1.1",
     "project_name":       "Acs-SD_Card",
-    "project_version":    "da8a2dc-dirty",
+    "project_version":    "f5fdd70-dirty",
     "project_path":       "C:/Users/Kusee/Acs-SD_Card",
     "idf_path":           "C:/Espressif/frameworks/esp-idf-v5.2.3",
     "build_dir":          "C:/Users/Kusee/Acs-SD_Card/build",

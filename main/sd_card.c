@@ -85,7 +85,6 @@ bool init_sd_card()
     else
         ESP_LOGI(TAG, "File created");
 
-    fprintf(file, "Begining of file\n");
     fclose(file);
     return !(error_occurred);
 }
