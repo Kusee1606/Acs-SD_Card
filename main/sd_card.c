@@ -28,15 +28,20 @@ bool init_sd_card()
     gpio_set_pull_mode(PIN_NUM_MOSI, GPIO_PULLUP_ONLY);
     gpio_set_pull_mode(PIN_NUM_CLK, GPIO_PULLUP_ONLY);
     gpio_set_pull_mode(PIN_NUM_CS, GPIO_PULLUP_ONLY);
+
     bool error_occurred = false;
+
     ESP_LOGI(TAG, "Initializing SD card");
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
         .format_if_mount_failed = false,
         .max_files = 2,
-        .allocation_unit_size = 16 * 1024};
+        .allocation_unit_size = 16 * 1024
+    };
+
     sdmmc_card_t *card;
     sdmmc_host_t host = SDSPI_HOST_DEFAULT();
     host.max_freq_khz = 5000;
+
     spi_bus_config_t bus_cfg = {
         .mosi_io_num = PIN_NUM_MOSI,
         .miso_io_num = PIN_NUM_MISO,
@@ -45,6 +50,7 @@ bool init_sd_card()
         .quadhd_io_num = -1,
         .max_transfer_sz = 4000,
     };
+
     ESP_LOGI(TAG, "Initializing SPI device");
     error_occurred |= (ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA)) != ESP_OK);
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
