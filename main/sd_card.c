@@ -29,8 +29,6 @@ bool init_sd_card()
     gpio_set_pull_mode(PIN_NUM_CLK, GPIO_PULLUP_ONLY);
     gpio_set_pull_mode(PIN_NUM_CS, GPIO_PULLUP_ONLY);
 
-    bool error_occurred = false;
-
     ESP_LOGI(TAG, "Initializing SD card");
     esp_vfs_fat_sdmmc_mount_config_t mount_config = {
         .format_if_mount_failed = false,
@@ -52,18 +50,39 @@ bool init_sd_card()
     };
 
     ESP_LOGI(TAG, "Initializing SPI device");
-    error_occurred |= (ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA)) != ESP_OK);
+    // error_occurred |= (ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA)) != ESP_OK);
+    if (ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(host.slot, &bus_cfg, SDSPI_DEFAULT_DMA)) != ESP_OK) {
+        ESP_LOGE(TAG, "Spi_bus_initialize error");
+        return false;
+    }
+
     sdspi_device_config_t slot_config = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot_config.gpio_cs = PIN_NUM_CS;
     slot_config.host_id = host.slot;
+
     ESP_LOGI(TAG, "Mounting SD card to %s ", MOUNT_POINT);
-    error_occurred |= (ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdspi_mount(MOUNT_POINT, &host, &slot_config, &mount_config, &card)) != ESP_OK);
+
+    // error_occurred |= (ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdspi_mount(MOUNT_POINT, &host, &slot_config, &mount_config, &card)) != ESP_OK);
+    /* Are you sure this will work? You give it &card, which is sdmmc_card_t *card
+     * the function supposedly
+     * https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/storage/fatfs.html#_CPPv426esp_vfs_fat_sdcard_unmountPKcP12sdmmc_card_t
+     * takes sdmm_card_t **out_card
+    */
+    if (ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdspi_mount(MOUNT_POINT, &host, &slot_config, &mount_config, &card)) != ESP_OK) {
+        ESP_LOGE(TAG, "esp_vsf_fat_sdspi_mount failure");
+        return false;
+    }
+
     sdmmc_card_print_info(stdout, card);
 
-    char *path = malloc(strlen(MOUNT_POINT) + strlen(FILENAME) + 1);
+    // char *path = malloc(strlen(MOUNT_POINT) + strlen(FILENAME) + 1);
+    char path[64];
     int path_size = strlen(path) + strlen("1000");
-    char *formated_path = malloc(path_size);
+    // char *formated_path = malloc(path_size);
+    char formated_path[64];
 
+    // I dont quite get what happens here, like this isn't very readable.
+    // Also this while loop is unnecessary, this should be for loop.
     strcpy(path, MOUNT_POINT);
     strcat(path, FILENAME);
     sprintf(formated_path, path, 1);
@@ -75,24 +94,28 @@ bool init_sd_card()
         if (i > 100)
         {
             ESP_LOGE(TAG, "Clean SD Card");
-            error_occurred |= 1;
-            return !(error_occurred);
+            // I'm not sure about this line, if it should be just &card
+            esp_vfs_fat_sdcard_unmount(MOUNT_POINT, &card);
+            return false;
         }
         sprintf(formated_path, path, i);
     }
     ESP_LOGI(TAG, "Trying to create file %s", formated_path);
     file = fopen(formated_path, "a+");
+
     if (file == NULL)
     {
         ESP_LOGE(TAG, "Falied to create file");
-        error_occurred |= (file != NULL);
-        return !(error_occurred);
+        // error_occurred |= (file != NULL); BRO WHY THIS BRO?
+        esp_vfs_fat_sdcard_unmount(MOUNT_POINT, &card);
+        return false;
     }
-    else
+    else {
         ESP_LOGI(TAG, "File created");
+    }
 
     fclose(file);
-    return !(error_occurred);
+    return true;
 }
 
 void update_sd_card_data()
