@@ -54,7 +54,7 @@ bool init_sd_card(sd_card_t *sd_card_data)
 
     sdspi_device_config_t slot_config_init = SDSPI_DEVICE_CONFIG_DEFAULT();
     slot_config_init.gpio_cs = PIN_NUM_CS;
-    slot_config_init.host_id = sd_card_data->host.slot;
+    slot_config_init.host_id = host_init.slot;
 
     sd_card_data->mount_config = mount_config_init;
     sd_card_data->slot_config = slot_config_init;
