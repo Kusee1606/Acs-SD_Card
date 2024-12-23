@@ -95,6 +95,15 @@ bool mount_sd_card(sd_card_t *sd_card_data)
     return true;
 }
 
+bool unmount_sd_card(sd_card_t *sd_card_data)
+{
+    esp_err_t ret;
+    fclose(sd_card_data->log_file);
+    ret = ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdcard_unmount(MOUNT_POINT, sd_card_data->card));
+    if (ret = ESP_OK)
+        return false;
+    return true;
+}
 bool find_free_path(sd_card_t *sd_card_data)
 {
     char path_init[256];
