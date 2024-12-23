@@ -11,8 +11,9 @@
 #include "string.h"
 #include "sys/stat.h"
 
-#define DATAHEADER ""
-#define DATAFORMAT ""
+#define DATAHEADER "time,posX,posY,posZ,velX,velY,velZ,oriX,oriY,oriZ,avelX,avelY,avelZ,alpha,beta"
+#define DATAFORMAT "%lu,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f\n"
+#define DATAVARIAVLES esp_log_timestamp(), rocket_state->position[0], rocket_state->position[1], rocket_state->position[2], rocket_state->velocity[0], rocket_state->velocity[1], rocket_state->velocity[2], rocket_state->orientation[0], rocket_state->orientation[1], rocket_state->orientation[2], rocket_state->angular_vel[0], rocket_state->angular_vel[1], rocket_state->angular_vel[2], rocket_state->alpha, rocket_state->beta
 
 #define TAG "SD_CARD"
 #define MOUNT_POINT "/sdcard"
@@ -74,17 +75,18 @@ bool init_sd_card(sd_card_t *sd_card_data)
     if (!find_free_path(sd_card_data))
         return false;
     ESP_LOGI(TAG, "Creating a file %s", sd_card_data->path);
-    sd_card_data->log_file = fopen(sd_card_data->path, "a+");
-    if (sd_card_data->log_file == NULL)
+    FILE *log_file = fopen(sd_card_data->path, "a+");
+    if (log_file == NULL)
     {
         ESP_LOGE(TAG, "Falied to create file");
         return false;
     }
     else
     {
-        ESP_LOGI(TAG, "File ");
+        ESP_LOGI(TAG, "File sucesfully created");
     }
-    fclose(sd_card_data->log_file);
+    fprintf(log_file, "%s\n", DATAHEADER);
+    fclose(log_file);
     return true;
 }
 
@@ -100,7 +102,6 @@ bool mount_sd_card(sd_card_t *sd_card_data)
 bool unmount_sd_card(sd_card_t *sd_card_data)
 {
     esp_err_t ret;
-    fclose(sd_card_data->log_file);
     ret = ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdcard_unmount(MOUNT_POINT, sd_card_data->card));
     if (ret != ESP_OK)
         return false;
@@ -124,6 +125,27 @@ bool find_free_path(sd_card_t *sd_card_data)
     return false;
 }
 
-void update_sd_card_data(sd_card_t *sd_card_data)
+void update_sd_card_data(sd_card_t *sd_card_data, rocket_state_t *rocket_state)
 {
+    FILE *log_file = fopen(sd_card_data->path, "a+");
+    if (log_file == NULL)
+    {
+        fclose(log_file);
+        ESP_LOGE(TAG, "Falied to open file, remounting SD card");
+        mount_sd_card(sd_card_data);
+        log_file = fopen(sd_card_data->path, "a+");
+        if (log_file == NULL)
+        {
+            ESP_LOGE(TAG, "Falied to remount SD card");
+            return;
+        }
+        else
+        {
+            ESP_LOGI(TAG, "Card sucessfully remounted");
+        }
+    }
+
+    fprintf(log_file, DATAFORMAT, DATAVARIAVLES);
+    ESP_LOGI(TAG, "Data sucesfully written to file");
+    fclose(log_file);
 }

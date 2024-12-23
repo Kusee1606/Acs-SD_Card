@@ -15,13 +15,12 @@ typedef struct
     sdmmc_card_t *card;
     sdmmc_host_t host;
     char path[256];
-    FILE *log_file;
 } sd_card_t;
 
 bool init_sd_card(sd_card_t *sd_card_data);
 bool mount_sd_card(sd_card_t *sd_card_data);
 bool unmount_sd_card(sd_card_t *sd_card_data);
 bool find_free_path(sd_card_t *sd_card_data);
-void update_sd_card_data(sd_card_t *sd_card_data);
+void update_sd_card_data(sd_card_t *sd_card_data, rocket_state_t *rocket_state);
 
 #endif //__SDCARD__
