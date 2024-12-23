@@ -96,7 +96,6 @@ typedef struct
     imu_data_t imu_latest;
     mag_data_t mag_latest;
     baro_data_t baro_latest;
-
     rocket_state_t rocket_state;
     absolute_state_t abs_state;
     canards_t controls;

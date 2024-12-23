@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "esp_vfs_fat.h"
 
 #include "../include/flight_data.h"
 

@@ -11,6 +11,9 @@
 #include "string.h"
 #include "sys/stat.h"
 
+#define DATAHEADER ""
+#define DATAFORMAT ""
+
 #define TAG "SD_CARD"
 #define MOUNT_POINT "/sdcard"
 #define FILENAME "LOT_"
@@ -37,10 +40,9 @@ bool init_sd_card(sd_card_t *sd_card_data)
         .max_files = 2,
         .allocation_unit_size = 16 * 1024};
 
-    sdmmc_card_t *card_init;
-
     sdmmc_host_t host_init = SDSPI_HOST_DEFAULT();
     host_init.max_freq_khz = SPI_FREQUENCY;
+    host_init.slot = VSPI_HOST;
 
     spi_bus_config_t bus_cfg_init = {
         .mosi_io_num = PIN_NUM_MOSI,
@@ -56,13 +58,12 @@ bool init_sd_card(sd_card_t *sd_card_data)
 
     sd_card_data->mount_config = mount_config_init;
     sd_card_data->slot_config = slot_config_init;
-    sd_card_data->card = card_init;
     sd_card_data->host = host_init;
     sd_card_data->bus_cfg = bus_cfg_init;
 
     ESP_LOGI(TAG, "Initializing SPI bus");
     ret = ESP_ERROR_CHECK_WITHOUT_ABORT(spi_bus_initialize(sd_card_data->host.slot, &sd_card_data->bus_cfg, SDSPI_DEFAULT_DMA));
-    if (ret == ESP_OK)
+    if (ret != ESP_OK)
         return false;
 
     ESP_LOGI(TAG, "Mounting SD card to %s ", MOUNT_POINT);
@@ -80,8 +81,9 @@ bool init_sd_card(sd_card_t *sd_card_data)
         return false;
     }
     else
-        ESP_LOGI(TAG, "File created");
-
+    {
+        ESP_LOGI(TAG, "File ");
+    }
     fclose(sd_card_data->log_file);
     return true;
 }
@@ -90,7 +92,7 @@ bool mount_sd_card(sd_card_t *sd_card_data)
 {
     esp_err_t ret;
     ret = ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdspi_mount(MOUNT_POINT, &sd_card_data->host, &sd_card_data->slot_config, &sd_card_data->mount_config, &sd_card_data->card));
-    if (ret = ESP_OK)
+    if (ret != ESP_OK)
         return false;
     return true;
 }
@@ -100,10 +102,11 @@ bool unmount_sd_card(sd_card_t *sd_card_data)
     esp_err_t ret;
     fclose(sd_card_data->log_file);
     ret = ESP_ERROR_CHECK_WITHOUT_ABORT(esp_vfs_fat_sdcard_unmount(MOUNT_POINT, sd_card_data->card));
-    if (ret = ESP_OK)
+    if (ret != ESP_OK)
         return false;
     return true;
 }
+
 bool find_free_path(sd_card_t *sd_card_data)
 {
     char path_init[256];
@@ -119,4 +122,8 @@ bool find_free_path(sd_card_t *sd_card_data)
     }
     ESP_LOGE(TAG, "Unable to find a path");
     return false;
+}
+
+void update_sd_card_data(sd_card_t *sd_card_data)
+{
 }

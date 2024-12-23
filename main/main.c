@@ -11,7 +11,8 @@
 
 void app_main(void)
 {
-    init_sd_card();
+    sd_card_t card;
+    init_sd_card(&card);
     while (1)
     {
         vTaskDelay(1000);
