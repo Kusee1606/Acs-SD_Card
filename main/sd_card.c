@@ -72,13 +72,17 @@ bool init_sd_card(sd_card_t *sd_card_data)
         return false;
     sdmmc_card_print_info(stdout, sd_card_data->card);
 
-    if (!find_free_path(sd_card_data))
+    if (!find_free_path(sd_card_data)) {
+        unmount_sd_card(sd_card_data);
         return false;
+    }
+
     ESP_LOGI(TAG, "Creating a file %s", sd_card_data->path);
     FILE *log_file = fopen(sd_card_data->path, "a+");
     if (log_file == NULL)
     {
         ESP_LOGE(TAG, "Falied to create file");
+        unmount_sd_card(sd_card_data);
         return false;
     }
     else
@@ -130,9 +134,13 @@ void update_sd_card_data(sd_card_t *sd_card_data, rocket_state_t *rocket_state)
     FILE *log_file = fopen(sd_card_data->path, "a+");
     if (log_file == NULL)
     {
-        fclose(log_file);
         ESP_LOGE(TAG, "Falied to open file, remounting SD card");
-        mount_sd_card(sd_card_data);
+
+        if (!mount_sd_card(sd_card_data)) {
+            ESP_LOGE(TAG, "Falied to remount SD card");
+            return;
+        }
+
         log_file = fopen(sd_card_data->path, "a+");
         if (log_file == NULL)
         {
